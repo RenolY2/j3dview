@@ -16,6 +16,11 @@ that would make your work easier, so you will have to look around for the requir
 
 If you only want to use J3DView, a compiled release for Windows exists here: https://github.com/blank63/j3dview/releases
 
+## How to run/install j3dview
+There are two ways to do it:
+* First method: You use setup.py. Read up on how to install a python program through setup.py
+* Second method: You execute j3dview.py directly without using setup.py. For this, uncomment two lines about pyximport in j3dview.py
+
 
 ## Controls
 * W, S:     Moves camera forward and backward
@@ -25,3 +30,4 @@ If you only want to use J3DView, a compiled release for Windows exists here: htt
 * J, L:     Rotates camera to the left and to the right
 * U, O:     Rotates camera clockwise and counter-clockwise
 * Shift:    Speeds up camera movement and rotation
+
