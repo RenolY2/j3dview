@@ -5,6 +5,11 @@ if __name__ == '__main__':
     import io
     import logging
     import OpenGL
+    
+    ## If you want to run j3dview.py without running setup.py, uncomment these two
+    ## lines so that texture.pyx can be imported.
+    #import pyximport
+    #pyximport.install()
 
     stderr_handler = logging.StreamHandler()
     stderr_handler.setLevel(logging.WARNING)
