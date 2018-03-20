@@ -15,7 +15,7 @@ import numpy
 
 arguments = dict(
         name='J3D View',
-        version='0.4',
+        version='0.5',
         description='Nintendo GameCube/Wii BMD/BDL file viewer',
         scripts = ['j3dview.py'],
         py_modules=['gl','viewer_widget','explorer_widget','forms'],
@@ -25,15 +25,18 @@ arguments['ext_modules'] = cythonize(Extension(
     'gx.texture',
     ['gx/texture.pyx'],
     include_dirs=[numpy.get_include()]))
-
+    
 if has_cx_freeze:
     base = 'Win32GUI' if platform.system() == 'Windows' else None
     build_exe = dict(
             includes=['viewer_widget','explorer_widget','forms', 'numpy.core._methods', 'numpy.lib.format'],
             packages=['OpenGL.platform','OpenGL.arrays'],
-            include_files=[('ui/Editor.ui','ui/Editor.ui'),('ui/ViewSettingsForm.ui','ui/ViewSettingsForm.ui'),('ui/TextureForm.ui','ui/TextureForm.ui')
-                            , "ui/icon.ico"])
-    arguments['executables'] = [Executable('j3dview.py',base=base, icon="kaio.ico")]
+            include_files=[('ui/Editor.ui','ui/Editor.ui'),('ui/ViewSettingsForm.ui','ui/ViewSettingsForm.ui'),
+                            ('ui/TextureForm.ui','ui/TextureForm.ui'),("ui/icon.ico", "ui/icon.ico")],
+            excludes=["numpy.multiarray"]
+            )
+            
+    arguments['executables'] = [Executable('j3dview.py',base=base, icon="ui/icon.ico")]
     arguments['options'] = dict(build_exe=build_exe)
 
 setup(**arguments)
