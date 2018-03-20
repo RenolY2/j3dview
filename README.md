@@ -17,10 +17,10 @@ Python versions >=3.6 are affected by the following issue and will not run the c
 First, make sure you have all required dependencies installed and ``python`` needs to run one of the two python versions mentioned above.
 Instead of ``python`` you could also directly type in the path to the correct python version, e.g. ``C:\Python35\python.exe``
 
-* Running j3dview 
+* Running j3dview <br>
 Edit j3dview.py and uncomment two lines about pyximport at the top of the file. 
 Then you can run j3dview.py with python 
-* Building j3dview 
+* Building j3dview <br>
 ```
 python setup.py build_ext --inplace
 python setup.py build
