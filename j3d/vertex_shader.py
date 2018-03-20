@@ -149,8 +149,13 @@ def create_shader_string(material,shape):
         if not material.use_texcoord[i]: continue
         stream.write('layout(location={}) in vec2 texcoord{};\n'.format(TEXCOORD_ATTRIBUTE_LOCATIONS[i],i))
 
-    for i,channel in enumerate(material.enabled_channels):
+    enabled = {}
+    for i, chan in enumerate(material.enabled_channels):
+        enabled[i] = True
+
+    for i,channel in enumerate(material.channels):
         stream.write('out vec4 channel{};\n'.format(i))
+
 
     for i,generator in enumerate(material.enabled_texcoord_generators):
         if generator.function == gx.TG_MTX3x4 and not (generator.source in gx.TG_TEX and generator.matrix == gx.IDENTITY): #<-?
@@ -158,15 +163,20 @@ def create_shader_string(material,shape):
         else:
             stream.write('out vec2 generated_texcoord{};\n'.format(i))
 
+    #stream.write('layout(location = 0) out vec4 diffuseColor;\n');
+
     stream.write('\nvoid main()\n{\n')
     stream.write('gl_Position = projection_matrix*vec4({},1.0);\n'.format(position))
+
+    for i, chan in enumerate(material.channels):
+        if i not in enabled:
+            stream.write('channel{} = vec4(0.0, 0.0, 0.0, 1.0);\n'.format(i))
 
     for i,channel in enumerate(material.enabled_channels):
         write_channel(stream,i,channel)
 
     for i,generator in enumerate(material.enabled_texcoord_generators):
         write_texcoord_generator(stream,i,generator,material.texture_matrices)
-
     stream.write('}\n')
 
     return stream.getvalue()

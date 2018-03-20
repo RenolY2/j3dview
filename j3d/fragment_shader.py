@@ -679,10 +679,11 @@ def create_shader_string(material):
         # if the alpha test fails, it just allows it
         stream.write('#extension GL_ARB_shader_image_load_store : enable\n')
         stream.write('layout(early_fragment_tests) in;\n')
+    stream.write('layout(location = 0) out vec4 diffuseColor;\n');
 
     stream.write('{}\n'.format(material.gl_block.glsl_type))
 
-    for i in range(material.channel_count):
+    for i,channel in enumerate(material.channels):
         stream.write('in vec4 channel{};\n'.format(i))
 
     for i,generator in enumerate(material.enabled_texcoord_generators):
@@ -725,7 +726,8 @@ def create_shader_string(material):
 
     write_alpha_test(stream,material.alpha_test)
 
-    stream.write('gl_FragColor = tevprev;\n')
+    #stream.write('gl_FragColor = tevprev;\n')
+    stream.write('diffuseColor = tevprev;\n')
     stream.write('}\n')
 
     return stream.getvalue()
