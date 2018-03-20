@@ -36,7 +36,7 @@ class Shader(Resource):
 
     def __init__(self,shader_type,source):
         super().__init__(glCreateShader(shader_type))
-
+        self.source = source
         glShaderSource(self,source)
         glCompileShader(self)
 
@@ -58,6 +58,11 @@ class Program(Resource):
         glLinkProgram(self)
 
         if not glGetProgramiv(self,GL_LINK_STATUS):
+            for i in range(len(shaders)):
+                shader = shaders[i]
+                with open("shader-{0}.txt".format(i), "w") as f:
+                    f.write(shader.source)
+
             raise RuntimeError('Link failure: {}'.format(glGetProgramInfoLog(self).decode()))
 
         for shader in shaders:

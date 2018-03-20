@@ -5,9 +5,7 @@ if __name__ == '__main__':
     import io
     import logging
     import OpenGL
-    
-    ## If you want to run j3dview.py without running setup.py, uncomment these two
-    ## lines so that texture.pyx can be imported.
+
     #import pyximport
     #pyximport.install()
 
@@ -21,18 +19,20 @@ if __name__ == '__main__':
     OpenGL.STORE_POINTERS = False
     OpenGL.FORWARD_COMPATIBLE_ONLY = True
     
+import logging
 import os.path
+
 import numpy
 from OpenGL.GL import *
-from PyQt4 import QtCore,QtGui,QtOpenGL,uic
-import qt
+from PyQt5 import QtCore, QtGui, QtOpenGL, uic, QtWidgets
+
+import explorer_widget
 import gx
 import gx.bti
-import j3d.model
 import j3d.animation
-import explorer_widget
+import j3d.model
+import qt
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -123,7 +123,7 @@ class ModelWrapper(qt.Wrapper):
         self.textures = TextureListWrapper(model.textures)
 
 
-class TextureReplaceCommand(QtGui.QUndoCommand):
+class TextureReplaceCommand(QtWidgets.QUndoCommand):
     #TODO: Should something be done about textures that are no longer being
     # used, but are still in the undo stack?
 
@@ -166,13 +166,15 @@ class PreviewWidget(QtOpenGL.QGLWidget):
     def resizeGL(self,width,height):
         glViewport(0,0,width,height)
 
+    def sizeHint(self):
+        return QtCore.QSize(self.minimumWidth(), 200)
 
-class Editor(QtGui.QMainWindow):
+class Editor(QtWidgets.QMainWindow):
 
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
 
-        self.undo_stack = QtGui.QUndoStack(self,objectName='undo_stack')
+        self.undo_stack = QtWidgets.QUndoStack(self,objectName='undo_stack')
         self.action_undo = self.undo_stack.createUndoAction(self)
         self.action_redo = self.undo_stack.createRedoAction(self)
 
@@ -197,6 +199,7 @@ class Editor(QtGui.QMainWindow):
         self.dock_view_settings.hide()
 
         self.preview = PreviewWidget(shareWidget=self.viewer)
+
         self.dock_preview.setWidget(self.preview)
 
         self.texture.setUndoStack(self.undo_stack)
@@ -208,7 +211,6 @@ class Editor(QtGui.QMainWindow):
         self.setWindowFilePath('')
 
         self.adjustSize()
-
         #self.readSettings()
 
     def windowFilePath(self):
@@ -220,9 +222,11 @@ class Editor(QtGui.QMainWindow):
         if path == '':
             self.has_window_file_path = False
             super().setWindowFilePath('[No File]')
+            super().setWindowTitle("j3dview")
         else:
             self.has_window_file_path = True
             super().setWindowFilePath(path)
+            super().setWindowTitle("{0} - j3dview".format(path))
 
     def writeSettings(self):
         settings = QtCore.QSettings()
@@ -258,7 +262,7 @@ class Editor(QtGui.QMainWindow):
         settings.endGroup()
 
     def warning(self,message):
-        QtGui.QMessageBox.warning(self,QtGui.qApp.applicationName(),message)
+        QtWidgets.QMessageBox.warning(self, QtWidgets.qApp.applicationName(),message)
 
     def warning_file_open_failed(self,error):
         self.warning('Could not open file \'{}\': {}'.format(error.filename,error.strerror))
@@ -328,14 +332,14 @@ class Editor(QtGui.QMainWindow):
     def on_explorer_customContextMenuRequested(self,position):
         item = self.explorer.itemAt(position)
         if isinstance(item,explorer_widget.TextureItem):
-            menu = QtGui.QMenu(self)
+            menu = QtWidgets.QMenu(self)
             menu.addAction(self.action_texture_export)
             menu.addAction(self.action_texture_replace)
             menu.exec_(self.explorer.mapToGlobal(position))
 
     @QtCore.pyqtSlot()
     def on_action_open_model_triggered(self):
-        file_name = QtGui.QFileDialog.getOpenFileName(
+        file_name, chosen = QtWidgets.QFileDialog.getOpenFileName(
                 self,
                 'Open Model',
                 self.windowFilePath(),
@@ -349,7 +353,7 @@ class Editor(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot()
     def on_action_open_animation_triggered(self):
-        file_name = QtGui.QFileDialog.getOpenFileName(
+        file_name, chosen = QtWidgets.QFileDialog.getOpenFileName(
                 self,
                 'Open Animation',
                 os.path.dirname(self.windowFilePath()),
@@ -372,7 +376,7 @@ class Editor(QtGui.QMainWindow):
 
     @QtCore.pyqtSlot()
     def on_action_save_model_as_triggered(self):
-        file_name = QtGui.QFileDialog.getSaveFileName(
+        file_name, chosen = QtWidgets.QFileDialog.getSaveFileName(
                 self,
                 'Save Model',
                 self.windowFilePath(),
@@ -387,7 +391,7 @@ class Editor(QtGui.QMainWindow):
     @QtCore.pyqtSlot()
     def on_action_texture_export_triggered(self):
         texture = self.explorer.currentItem().texture
-        file_name = QtGui.QFileDialog.getSaveFileName(
+        file_name, chosen = QtWidgets.QFileDialog.getSaveFileName(
                 self,
                 'Export Texture',
                 os.path.join(os.path.dirname(self.windowFilePath()),texture.name + '.bti'),
@@ -402,7 +406,7 @@ class Editor(QtGui.QMainWindow):
     @QtCore.pyqtSlot()
     def on_action_texture_replace_triggered(self):
         index = self.explorer.texture_list.indexOfChild(self.explorer.currentItem())
-        file_name = QtGui.QFileDialog.getOpenFileName(
+        file_name, chosen = QtWidgets.QFileDialog.getOpenFileName(
                 self,
                 'Open Texture',
                 os.path.dirname(self.windowFilePath()),
@@ -419,20 +423,30 @@ class Editor(QtGui.QMainWindow):
 if __name__ == '__main__':
     import sys
     import argparse
+    import ctypes
+    import platform
 
     def excepthook(*exception_info):
         logger.error('unexpected error',exc_info=exception_info)
 
-        message = QtGui.QMessageBox(None)
-        message.setWindowTitle(QtGui.qApp.applicationName())
-        message.setIcon(QtGui.QMessageBox.Critical)
+        out = logging_stream.getvalue()
+        with open("errorlog.txt", "w") as f:
+            f.write(out)
+
+        message = QtWidgets.QMessageBox(None)
+        message.setWindowTitle(QtWidgets.qApp.applicationName())
+        message.setIcon(QtWidgets.QMessageBox.Critical)
         message.setText('An unexpected error occurred.')
-        message.setDetailedText(logging_stream.getvalue())
-        message.setStandardButtons(QtGui.QMessageBox.Ok)
-        message.setDefaultButton(QtGui.QMessageBox.Ok)
+
+
+        message.setDetailedText(out)
+        message.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        message.setDefaultButton(QtWidgets.QMessageBox.Ok)
         message.exec_()
 
-        QtGui.qApp.exit()
+
+
+        QtWidgets.qApp.exit()
 
     logger.info('Python version: %s',sys.version)
     logger.info('NumPy version: %s',numpy.version.version)
@@ -440,10 +454,14 @@ if __name__ == '__main__':
     logger.info('PyQt version: %s',QtCore.PYQT_VERSION_STR)
     logger.info('PyOpenGL version: %s',OpenGL.__version__)
 
-    application = QtGui.QApplication(sys.argv)
+    if platform.system() == 'Windows':
+        myappid = 'j3dview.v0.5' 
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+    application = QtWidgets.QApplication(sys.argv)
     application.setOrganizationName('BlankSoft')
     application.setApplicationName('J3D View')
-
+    application.setWindowIcon(QtGui.QIcon('ui/icon.ico'))
     sys.excepthook = excepthook
 
     parser = argparse.ArgumentParser(description='View Nintendo GameCube/Wii BMD/BDL files')

@@ -694,18 +694,24 @@ class SectionUnpacker:
     @array_unloader(Color)
     def unpack_material_color(array,material,entry):
         for channel,index in zip(material.channels,entry.material_color_indices):
+            if index is None:
+                continue
             channel.material_color = array[index]
 
     @array_unloader(Color)
     def unpack_ambient_color(array,material,entry):
         for channel,index in zip(material.channels,entry.ambient_color_indices):
+            if index is None:
+                continue
             channel.ambient_color = array[index]
 
     @array_unloader(LightingMode)
     def unpack_lighting_mode(array,material,entry):
         for channel,channel_entry in zip(material.channels,entry.channels):
-            channel.color_mode = array[channel_entry.color_mode_index]
-            channel.alpha_mode = array[channel_entry.alpha_mode_index]
+            if channel_entry.color_mode_index is not None:
+                channel.color_mode = array[channel_entry.color_mode_index]
+            if channel_entry.alpha_mode_index is not None:
+                channel.alpha_mode = array[channel_entry.alpha_mode_index]
 
     @array_unloader(Light)
     def unpack_light(array,material,entry):
@@ -765,18 +771,24 @@ class SectionUnpacker:
     @array_unloader(ColorS16)
     def unpack_tev_color(array,material,entry):
         for i,index in enumerate(entry.tev_color_indices):
+            if index is None:
+                continue
             material.tev_colors[i] = array[index]
-
-        material.tev_color_previous = array[entry.tev_color_previous_index]
+        if entry.tev_color_previous_index is not None:
+            material.tev_color_previous = array[entry.tev_color_previous_index]
 
     @array_unloader(Color)
     def unpack_kcolor(array,material,entry):
         for i,index in enumerate(entry.kcolor_indices):
+            if index is None:
+                continue
             material.kcolors[i] = array[index]
 
     @array_unloader(SwapTable)
     def unpack_swap_table(array,material,entry):
         for i,index in enumerate(entry.swap_table_indices):
+            if index is None:
+                continue
             material.swap_tables[i] = array[index]
 
     @array_unloader(Fog)
@@ -1038,12 +1050,14 @@ class SectionUnpackerSVR0(SectionUnpacker):
 
 
 def pack(stream,materials,subversion):
+    print(subversion)
     if subversion == b'SVR3':
         packer = SectionPacker()
     elif subversion == b'\xFF\xFF\xFF\xFF':
         packer = SectionPackerSVR0()
     else:
-        raise ValueError('invalid subversion')
+        packer = SectionPacker()
+        #raise ValueError('invalid subversion')
 
     packer.pack(stream,materials)
 
@@ -1054,7 +1068,9 @@ def unpack(stream,subversion):
     elif subversion == b'\xFF\xFF\xFF\xFF':
         unpacker = SectionUnpackerSVR0()
     else:
-        raise ValueError('invalid subversion')
+        #raise ValueError('invalid subversion')
+        #print("Unusual subversion", subversion)
+        unpacker = SectionUnpacker()
 
     return unpacker.unpack(stream)
 

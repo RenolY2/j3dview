@@ -61,8 +61,8 @@ class Header(Struct):
         if header.section_count != valid_section_count:
             raise FormatError('invalid section count')
 
-        if header.subversion not in valid_subversions:
-            raise FormatError('invalid subversion')
+        #if header.subversion not in valid_subversions:
+        #    #raise FormatError('invalid subversion')
 
         return header
 
@@ -153,10 +153,17 @@ class GLDrawObject:
 class Model:
 
     def gl_init(self):
+        self.gl_texture_factory = functools.lru_cache(maxsize=None)(gx.texture.GLTexture)
+        for texture in self.textures:
+            if len(texture.images) > 0:
+                texture.gl_init(self.gl_texture_factory)
+            else:
+                raise RuntimeError("amount of images: {0}".format(len(texture.images)))
+
         self.gl_vertex_shader_factory = functools.lru_cache(maxsize=None)(functools.partial(gl.Shader,GL_VERTEX_SHADER))
         self.gl_fragment_shader_factory = functools.lru_cache(maxsize=None)(functools.partial(gl.Shader,GL_FRAGMENT_SHADER))
         self.gl_program_factory = functools.lru_cache(maxsize=None)(GLProgram)
-        self.gl_texture_factory = functools.lru_cache(maxsize=None)(gx.texture.GLTexture)
+
 
         array_table = {gx.VA_PTNMTXIDX:GLMatrixIndexArray()}
         array_table.update((attribute,array.gl_convert()) for attribute,array in self.array_table.items())
@@ -167,8 +174,7 @@ class Model:
         for material in self.materials:
             material.gl_init()
 
-        for texture in self.textures:
-            texture.gl_init(self.gl_texture_factory)
+
 
         self.gl_joints = [copy.copy(joint) for joint in self.joints]
         self.gl_joint_matrices = numpy.empty((len(self.joints),3,4),numpy.float32)
@@ -180,7 +186,8 @@ class Model:
 
     def gl_create_draw_object(self,shape,material):
         vertex_shader = self.gl_vertex_shader_factory(j3d.vertex_shader.create_shader_string(material,shape))
-        fragment_shader = self.gl_fragment_shader_factory(j3d.fragment_shader.create_shader_string(material))
+        shaderstring = j3d.fragment_shader.create_shader_string(material)
+        fragment_shader = self.gl_fragment_shader_factory(shaderstring)
         program = self.gl_program_factory(vertex_shader,fragment_shader)
         return GLDrawObject(shape,material,program)
 

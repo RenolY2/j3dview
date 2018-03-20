@@ -428,6 +428,8 @@ class Material:
     @property
     def enabled_channels(self):
         for i in range(self.channel_count):
+            if i >= len(self.channels)-1:
+                raise StopIteration
             yield self.channels[i]
 
     @property
@@ -458,6 +460,8 @@ class Material:
         self.use_indirect_matrix = [False]*3
 
         for i,channel in enumerate(self.enabled_channels):
+            if i >= 2:
+                break
             if channel.color_mode.material_source == gx.SRC_REG:
                 self.use_material_color[i] = True
             elif channel.color_mode.material_source == gx.SRC_VTX:

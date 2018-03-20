@@ -1,12 +1,13 @@
-from math import cos,sin,tan,radians
-import os.path
+import logging
+from math import cos, sin, tan, radians
+
 import numpy
 from OpenGL.GL import *
-from PyQt4 import QtCore,QtGui,QtOpenGL,uic
+from PyQt5 import QtCore, QtOpenGL, QtWidgets
+
 import qt
 from j3d.opengl import *
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -51,7 +52,7 @@ def create_frustum_matrix(left,right,bottom,top,near,far):
         numpy.float32)
 
 
-class ViewerWidget(QtOpenGL.QGLWidget,metaclass=qt.PropertyOwnerMetaClass):
+class ViewerWidget(QtOpenGL.QGLWidget, metaclass=qt.PropertyOwnerMetaClass):
 
     z_near = qt.Property(float)
     z_far = qt.Property(float)
@@ -109,7 +110,7 @@ class ViewerWidget(QtOpenGL.QGLWidget,metaclass=qt.PropertyOwnerMetaClass):
 
         self.pressed_keys = set()
 
-        QtGui.qApp.aboutToQuit.connect(self.on_application_aboutToQuit)
+        QtWidgets.qApp.aboutToQuit.connect(self.on_application_aboutToQuit)
 
     def update_projection_matrix(self):
         u = self.z_near*tan(radians(self.fov))
@@ -168,7 +169,7 @@ class ViewerWidget(QtOpenGL.QGLWidget,metaclass=qt.PropertyOwnerMetaClass):
 
     @QtCore.pyqtSlot()
     def on_animation_timer_timeout(self):
-        if QtGui.qApp.keyboardModifiers() & QtCore.Qt.ShiftModifier:
+        if QtWidgets.qApp.keyboardModifiers() & QtCore.Qt.ShiftModifier:
             movement_speed = 5*self.movement_speed
             rotation_speed = 5*self.rotation_speed
         else:

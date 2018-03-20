@@ -29,10 +29,11 @@ arguments['ext_modules'] = cythonize(Extension(
 if has_cx_freeze:
     base = 'Win32GUI' if platform.system() == 'Windows' else None
     build_exe = dict(
-            includes=['viewer_widget','explorer_widget','forms'],
+            includes=['viewer_widget','explorer_widget','forms', 'numpy.core._methods', 'numpy.lib.format'],
             packages=['OpenGL.platform','OpenGL.arrays'],
-            include_files=[('ui/Editor.ui','ui/Editor.ui'),('ui/ViewSettingsForm.ui','ui/ViewSettingsForm.ui'),('ui/TextureForm.ui','ui/TextureForm.ui')])
-    arguments['executables'] = [Executable('j3dview.py',base=base)]
+            include_files=[('ui/Editor.ui','ui/Editor.ui'),('ui/ViewSettingsForm.ui','ui/ViewSettingsForm.ui'),('ui/TextureForm.ui','ui/TextureForm.ui')
+                            , "ui/icon.ico"])
+    arguments['executables'] = [Executable('j3dview.py',base=base, icon="kaio.ico")]
     arguments['options'] = dict(build_exe=build_exe)
 
 setup(**arguments)

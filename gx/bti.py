@@ -48,6 +48,10 @@ class Texture(gx.texture.Texture,Struct):
             logger.warning('unknown0 different from default')
         if texture.unknown1 not in {0,1}:
             logger.warning('unknown1 different from default')
+
+        if texture.level_count == 0:
+            texture.level_count = 1
+            logger.warning("Mip map level was 0, set to 1")
         return texture
 
 
@@ -137,7 +141,11 @@ def unpack_textures(stream,texture_count):
     for i,texture in enumerate(textures):
         texture_offset = base + i*Texture.sizeof()
         image_offset = texture_offset + texture.image_offset
-        texture.images = unpack_images(image_offset,texture.image_format,texture.width,texture.height,texture.level_count)
+        texture.images = unpack_images(image_offset,
+                                       texture.image_format,
+                                       texture.width,
+                                       texture.height,
+                                       texture.level_count)
 
     return textures
 
