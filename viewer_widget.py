@@ -1,6 +1,6 @@
 import logging
 from math import cos, sin, tan, radians
-
+from copy import copy 
 import numpy
 from OpenGL.GL import *
 from PyQt5 import QtCore, QtOpenGL, QtWidgets
@@ -175,24 +175,29 @@ class ViewerWidget(QtOpenGL.QGLWidget, metaclass=qt.PropertyOwnerMetaClass):
         else:
             movement_speed = self.movement_speed
             rotation_speed = self.rotation_speed
-
+        frontvec = copy(self.view_matrix[2,0:3])
+        upvec = copy(self.view_matrix[1,0:3])
+        leftvec = copy(self.view_matrix[0,0:3])
+        frontvec[1] = 0
+        upvec[0] = upvec[2] = 0
+        leftvec[1] = 0
         if QtCore.Qt.Key_A in self.pressed_keys and QtCore.Qt.Key_D not in self.pressed_keys:
-            self.view_position -= movement_speed*self.view_matrix[0,0:3]
+            self.view_position -= movement_speed*leftvec
             self.view_matrix_need_update = True
         if QtCore.Qt.Key_D in self.pressed_keys and QtCore.Qt.Key_A not in self.pressed_keys:
-            self.view_position += movement_speed*self.view_matrix[0,0:3]
+            self.view_position += movement_speed*leftvec
             self.view_matrix_need_update = True
         if QtCore.Qt.Key_Q in self.pressed_keys and QtCore.Qt.Key_E not in self.pressed_keys:
-            self.view_position -= movement_speed*self.view_matrix[1,0:3]
+            self.view_position -= movement_speed*upvec
             self.view_matrix_need_update = True
         if QtCore.Qt.Key_E in self.pressed_keys and QtCore.Qt.Key_Q not in self.pressed_keys:
-            self.view_position += movement_speed*self.view_matrix[1,0:3]
+            self.view_position += movement_speed*upvec
             self.view_matrix_need_update = True
         if QtCore.Qt.Key_W in self.pressed_keys and QtCore.Qt.Key_S not in self.pressed_keys:
-            self.view_position -= movement_speed*self.view_matrix[2,0:3]
+            self.view_position -= movement_speed*frontvec
             self.view_matrix_need_update = True
         if QtCore.Qt.Key_S in self.pressed_keys and QtCore.Qt.Key_W not in self.pressed_keys:
-            self.view_position += movement_speed*self.view_matrix[2,0:3]
+            self.view_position += movement_speed*frontvec
             self.view_matrix_need_update = True
 
         if QtCore.Qt.Key_J in self.pressed_keys and QtCore.Qt.Key_L not in self.pressed_keys:
