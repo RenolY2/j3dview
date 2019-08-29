@@ -143,16 +143,28 @@ class TextureMatrix(Struct):
         T = numpy.matrix([[1,0,self.translation_s],[0,1,self.translation_t],[0,0,1]])
 
         # Only types 0x00, 0x06, 0x07, 0x08 and 0x09 have been tested
-        if self.matrix_type in {0x00,0x02,0x0A,0x0B,0x80}:
-            P = numpy.matrix([[1,0,0,0],[0,1,0,0],[0,0,0,1]])
+        if self.matrix_type in {0x00,0x01,0x02,0x0A,0x0B,0x80}:
+            P = numpy.matrix([
+            [1,0,0,0],
+            [0,1,0,0],
+            [0,0,0,1]])
         elif self.matrix_type == 0x06:
-            P = numpy.matrix([[0.5,0,0,0.5],[0,-0.5,0,0.5],[0,0,0,1]])
+            P = numpy.matrix([
+            [0.5,0,0,0.5],
+            [0,-0.5,0,0.5],
+            [0,0,0,1]])
         elif self.matrix_type == 0x07:
-            P = numpy.matrix([[0.5,0,0.5,0],[0,-0.5,0.5,0],[0,0,1,0]])
+            P = numpy.matrix([
+            [0.5,0,0.5,0],
+            [0,-0.5,0.5,0],
+            [0,0,1,0]])
         elif self.matrix_type in {0x08,0x09}:
-            P = numpy.matrix([[0.5,0,0.5,0],[0,-0.5,0.5,0],[0,0,1,0]])*numpy.matrix(self.projection_matrix)
+            P = numpy.matrix([
+            [0.5,0,0.5,0],
+            [0,-0.5,0.5,0],
+            [0,0,1,0]])*numpy.matrix(self.projection_matrix)
         else:
-            raise ValueError('invalid texture matrix type')
+            raise ValueError('invalid texture matrix type {0}'.format(self.matrix_type))
 
         M = T*C*S*R*C.I*P
 
