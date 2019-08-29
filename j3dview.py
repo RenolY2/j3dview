@@ -158,16 +158,17 @@ class PreviewWidget(QtOpenGL.QGLWidget):
         if self.texture is not None and self.height() != 0 and self.width() != 0:
             s = self.width()/self.height()*self.texture.height/self.texture.width
             if s < 1:
-                self.drawTexture(QtCore.QRectF(-1,-s,2,2*s),self.texture.gl_texture)
+                self.drawTexture(QtCore.QRectF(-1,-s,2,2*s), int(self.texture.gl_texture))
             else:
                 s = self.height()/self.width()*self.texture.width/self.texture.height
-                self.drawTexture(QtCore.QRectF(-s,-1,2*s,2),self.texture.gl_texture)
+                self.drawTexture(QtCore.QRectF(-s,-1,2*s,2),int(self.texture.gl_texture))
 
     def resizeGL(self,width,height):
         glViewport(0,0,width,height)
 
     def sizeHint(self):
         return QtCore.QSize(self.minimumWidth(), 200)
+
 
 class Editor(QtWidgets.QMainWindow):
 
