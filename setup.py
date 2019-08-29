@@ -21,10 +21,10 @@ arguments = dict(
         py_modules=['gl','viewer_widget','explorer_widget','forms'],
         packages=['btypes','gx','j3d'])
 
-arguments['ext_modules'] = cythonize(Extension(
-    'gx.texture',
-    ['gx/texture.pyx'],
-    include_dirs=[numpy.get_include()]))
+#arguments['ext_modules'] = cythonize(Extension(
+#    'gx.texture',
+#    ['gx/texture.pyx'],
+#    include_dirs=[numpy.get_include()]))
     
 if has_cx_freeze:
     base = 'Win32GUI' if platform.system() == 'Windows' else None
