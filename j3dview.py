@@ -52,6 +52,7 @@ class TextureWrapper(qt.Wrapper):
     unknown1 = qt.Wrapper.Property(int)
     unknown2 = qt.Wrapper.Property(int)
 
+
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
 
@@ -131,8 +132,23 @@ class TextureReplaceCommand(QtWidgets.QUndoCommand):
         super().__init__('Replace Texture')
         self.textures = textures
         self.index = index
+
         self.old_value = textures[index]
         self.new_value = new_value
+        new = self.new_value
+        old = self.old_value
+
+        new.wrap_s = old.wrap_s
+        new.wrap_t = old.wrap_t
+        new.minification_filter = old.minification_filter
+        new.magnification_filter = old.magnification_filter
+
+        new.minimum_lod = old.minimum_lod
+        new.maximum_lod = old.maximum_lod
+        new.lod_bias = old.lod_bias
+        new.unknown0 = old.unknown0
+        new.unknown1 = old.unknown1
+        new.unknown2 = old.unknown2
 
     def redo(self):
         self.textures[self.index] = self.new_value
