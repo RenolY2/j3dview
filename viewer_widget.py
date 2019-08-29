@@ -1,6 +1,6 @@
 import logging
 from math import cos, sin, tan, radians
-from copy import copy 
+from copy import copy
 import numpy
 from OpenGL.GL import *
 from PyQt5 import QtCore, QtOpenGL, QtWidgets
@@ -169,7 +169,7 @@ class ViewerWidget(QtOpenGL.QGLWidget, metaclass=qt.PropertyOwnerMetaClass):
 
     @QtCore.pyqtSlot()
     def on_animation_timer_timeout(self):
-        if QtWidgets.qApp.keyboardModifiers() & QtCore.Qt.ShiftModifier:
+        if QtCore.Qt.Key_Shift in self.pressed_keys:
             movement_speed = 5*self.movement_speed
             rotation_speed = 5*self.rotation_speed
         else:
