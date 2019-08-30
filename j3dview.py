@@ -21,6 +21,7 @@ if __name__ == '__main__':
     
 import logging
 import os.path
+import configparser
 
 import numpy
 from OpenGL.GL import *
@@ -138,17 +139,30 @@ class TextureReplaceCommand(QtWidgets.QUndoCommand):
         new = self.new_value
         old = self.old_value
 
-        new.wrap_s = old.wrap_s
-        new.wrap_t = old.wrap_t
-        new.minification_filter = old.minification_filter
-        new.magnification_filter = old.magnification_filter
+        config = configparser.ConfigParser()
+        try:
+            config.read("options.ini")
+            keeporiginalheader = config["Textures"].getboolean("keeporiginalheader")
+        except KeyError:
+            config["Textures"] = {"keeporiginalheader": "True"}
+            with open("options.ini", "w") as f:
+                f.write("")
+                config.write(f)
 
-        new.minimum_lod = old.minimum_lod
-        new.maximum_lod = old.maximum_lod
-        new.lod_bias = old.lod_bias
-        new.unknown0 = old.unknown0
-        new.unknown1 = old.unknown1
-        new.unknown2 = old.unknown2
+            keeporiginalheader = True
+
+        if keeporiginalheader:
+            new.wrap_s = old.wrap_s
+            new.wrap_t = old.wrap_t
+            new.minification_filter = old.minification_filter
+            new.magnification_filter = old.magnification_filter
+
+            new.minimum_lod = old.minimum_lod
+            new.maximum_lod = old.maximum_lod
+            new.lod_bias = old.lod_bias
+            new.unknown0 = old.unknown0
+            new.unknown1 = old.unknown1
+            new.unknown2 = old.unknown2
 
     def redo(self):
         self.textures[self.index] = self.new_value
