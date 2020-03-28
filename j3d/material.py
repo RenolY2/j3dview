@@ -421,6 +421,7 @@ class Material:
         self.kcolors = [Color(0xFF,0xFF,0xFF) for _ in range(4)]
         self.swap_tables = [SwapTable() for _ in range(4)]
 
+        self.has_indirect_lookup = 0
         self.indirect_stage_count = 0
         self.indirect_stages = [IndirectStage() for _ in range(4)]
         self.indirect_matrices = [IndirectMatrix() for _ in range(3)]

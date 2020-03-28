@@ -194,6 +194,7 @@ class Model:
     def gl_generate_draw_objects(self,node,parent_material=None):
         for child in node.children:
             if child.node_type == j3d.inf1.NodeType.SHAPE:
+                print(parent_material.name)
                 yield self.gl_create_draw_object(self.shapes[child.index],parent_material)
                 yield from self.gl_generate_draw_objects(child,parent_material)
             elif child.node_type == j3d.inf1.NodeType.MATERIAL:

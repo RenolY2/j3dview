@@ -231,8 +231,8 @@ class Entry(Struct):
 
         
 class IndirectEntry(Struct):
-    unknown0 = uint8 # enable or indirect stage count?
-    unknown1 = uint8 # enable or indirect stage count?
+    has_lookup = uint8 # enable or indirect stage count?
+    indirect_stage_count = uint8 # enable or indirect stage count?
     __padding__ = Padding(2)
     indirect_orders = Array(IndirectOrder,4)
     indirect_matrices = Array(IndirectMatrix,3)
@@ -248,13 +248,13 @@ class IndirectEntry(Struct):
     @classmethod
     def unpack(cls,stream):
         indirect_entry = super().unpack(stream)
-        if indirect_entry.unknown0 != indirect_entry.unknown1 or indirect_entry.unknown0 not in {0,1}:
-            raise FormatError('unsuported indirect texture entry unknown0 and unknown1')
+        #if indirect_entry.unknown0 != indirect_entry.unknown1 or indirect_entry.unknown0 not in {0,1}:
+        #    raise FormatError('unsuported indirect texture entry unknown0 and unknown1')
         return indirect_entry
 
     def load(self,material):
-        self.unknown0 = material.indirect_stage_count
-        self.unknown1 = material.indirect_stage_count
+        self.has_lookup = material.has_indirect_lookup
+        self.indirect_stage_count = material.indirect_stage_count
 
         for stage,tev_indirect in zip(material.tev_stages,self.tev_indirects):
             tev_indirect.indirect_stage = stage.indirect_stage
@@ -278,7 +278,8 @@ class IndirectEntry(Struct):
         self.indirect_matrices = material.indirect_matrices
 
     def unload(self,material):
-        material.indirect_stage_count = self.unknown0
+        material.indirect_stage_count = self.indirect_stage_count
+        material.has_indirect_lookup = self.has_lookup
 
         for tev_stage,tev_indirect in zip(material.tev_stages,self.tev_indirects):
             tev_stage.indirect_stage = tev_indirect.indirect_stage
