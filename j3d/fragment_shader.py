@@ -534,7 +534,7 @@ def write_tev_stage(stream,stage,material):
         stream.write('floor({0}*indtex{1}.{2})/{0}'.format(alphabump_scale,stage.indirect_stage.index,convert_bump_alpha(stage.bump_alpha))) #<-?
         stream.write(';\n')
 
-    if not material.has_indirect_lookup:
+    if not material.has_indirect_lookup or stage.indirect_matrix == gx.ITM_OFF:
         stream.write('indtevtrans = vec2(0.0);\n')
     else:
         if stage.indirect_format == gx.ITF_8:
